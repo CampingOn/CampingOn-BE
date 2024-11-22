@@ -8,6 +8,5 @@ import java.util.List;
 
 @Repository
 public interface CampKeywordRepository extends JpaRepository<CampKeyword, Long> {
-
     List<CampKeyword> findByCampId(Long id);
 }

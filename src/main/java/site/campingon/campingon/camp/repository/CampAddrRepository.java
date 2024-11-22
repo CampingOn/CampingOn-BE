@@ -6,6 +6,5 @@ import site.campingon.campingon.camp.entity.CampAddr;
 
 @Repository
 public interface CampAddrRepository extends JpaRepository<CampAddr, Long> {
-
     CampAddr findByCampId(Long id);
 }
