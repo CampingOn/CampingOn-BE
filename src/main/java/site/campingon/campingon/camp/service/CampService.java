@@ -32,22 +32,26 @@ public class CampService {
     private final LikeRepository likeRepository;
     private final CampMapper campMapper;
 
-    // 추천 캠핑장 조회
-    public List<CampListResponseDto> getRecommendedCampsByKeywords(Long userId, int size) {
+    // 추천 캠핑장 조회 (페이지네이션 - 횡스크롤 3개)
+    public Page<CampListResponseDto> getRecommendedCampsByKeywords(Long userId, Pageable pageable) {
         List<String> userKeywords = userKeywordRepository.findKeywordsByUserId(userId);
 
         if (userKeywords.isEmpty()) {
-            return List.of();
+            return Page.empty(pageable);
         }
 
-        return campRepository.findRecommendedCampsByKeywords(userKeywords, PageRequest.of(0, size))
-                .stream()
+        // 키워드 매칭된 캠핑장을 페이지네이션으로 조회
+        Page<Camp> recommendedCamps = campRepository.findRecommendedCampsByKeywords(userKeywords, pageable);
+
+        List<CampListResponseDto> campDtos = recommendedCamps.getContent().stream()
                 .map(camp -> {
                     CampListResponseDto dto = campMapper.toCampListDto(camp);
                     dto.setLike(likeRepository.existsByCampIdAndUserId(camp.getId(), userId));
                     return dto;
                 })
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(campDtos, pageable, recommendedCamps.getTotalElements());
     }
 
     // 인기 캠핑장 조회 - recommendCnt에 따른

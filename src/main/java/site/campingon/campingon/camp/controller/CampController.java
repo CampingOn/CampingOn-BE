@@ -29,24 +29,26 @@ public class CampController {
     private final CampService campService;
     private final UserKeywordRepository userKeywordRepository;
 
-    private static final int RECOMMENDED_CAMP_SIZE = 3;
     private static final int DEFAULT_PAGE_SIZE = 12;
     private static final int KEYWORD_MATCHED_PAGE_SIZE = 9;
 
-    // 사용자 키워드 맞춤 캠핑장 목록 조회
+    // 사용자 키워드 맞춤 캠핑장 목록 조회 (페이지네이션 - 횡스크롤)
     @GetMapping("/recommended")
     @PreAuthorize("isAuthenticated()")  // 로그인 확인
-    public ResponseEntity<List<CampListResponseDto>> getRecommendedCamps(
+    public ResponseEntity<Page<CampListResponseDto>> getRecommendedCamps(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size,
             @AuthenticationPrincipal UserDetails userDetails   // 추후 UserDto로 커스텀
     ) {
         User user = (User) userDetails;
-        List<CampListResponseDto> recommendedCamps =
-                campService.getRecommendedCampsByKeywords(   // 사용자 키워드에 가장 일치하는 내림차순 정렬
-                        user.getId(),
-                        RECOMMENDED_CAMP_SIZE
-                );
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-        return ResponseEntity.ok(Optional.ofNullable(recommendedCamps).orElseGet(ArrayList::new));
+        Page<CampListResponseDto> recommendedCamps = campService.getRecommendedCampsByKeywords(
+                user.getId(),
+                pageRequest
+        );
+
+        return ResponseEntity.ok(recommendedCamps);
     }
 
     // 캠핑장 인기 목록 조회 (페이지네이션)

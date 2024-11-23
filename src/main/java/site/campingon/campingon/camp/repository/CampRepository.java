@@ -16,13 +16,13 @@ import java.util.List;
 public interface CampRepository extends JpaRepository<Camp, Long> {
 
     @Query("""
-    SELECT c FROM Camp c
+    SELECT DISTINCT c FROM Camp c
     JOIN CampKeyword ck ON c.id = ck.camp.id
     WHERE ck.keyword IN :keywords
     GROUP BY c
     ORDER BY COUNT(ck.keyword) DESC
   """)
-    List<Camp> findRecommendedCampsByKeywords(@Param("keywords") List<String> keywords, Pageable pageable);
+    Page<Camp> findRecommendedCampsByKeywords(@Param("keywords") List<String> keywords, Pageable pageable);
 
     @Query("""
     SELECT c FROM Camp c
@@ -31,18 +31,4 @@ public interface CampRepository extends JpaRepository<Camp, Long> {
   """)
     Page<Camp> findPopularCamps(Pageable pageable);  // 추천수 순 내림차순
 
-    @Query(value = "SELECT * FROM camp c " +
-            "JOIN camp_info ci ON c.id = ci.camp_id " +
-            "WHERE c.user_id = :userId " +
-            "ORDER BY ci.recommend_cnt DESC " +
-            "LIMIT :size", nativeQuery = true)
-    List<Camp> findRecommendedCampsByUserId(@Param("userId") Long userId, @Param("size") int size);
-
-
-
-
-    @Query("SELECT c FROM Camp c " +
-            "WHERE (c.campName LIKE %:keyword% OR c.lineIntro LIKE %:keyword%) " +
-            "AND c.campAddr.city LIKE %:location%")
-    Page<Camp> searchCamps(@Param("keyword") String keyword, @Param("location") String location, PageRequest pageRequest);
 }
