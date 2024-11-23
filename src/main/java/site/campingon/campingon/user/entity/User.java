@@ -2,12 +2,15 @@ package site.campingon.campingon.user.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.campingon.campingon.common.entity.BaseEntity;
-
+import site.campingon.campingon.like.entity.Like;
 
 @Entity
 @AllArgsConstructor
@@ -15,7 +18,6 @@ import site.campingon.campingon.common.entity.BaseEntity;
 @Getter
 @Builder(toBuilder = true)
 public class User extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "INT UNSIGNED")
@@ -26,9 +28,6 @@ public class User extends BaseEntity {
 
     @Column(length = 60)
     private String password;
-
-    @Column(nullable = true, length = 50)
-    private String name;
 
     // oauth 로그인인 경우에 생성되는 값
     private String oauthName;
@@ -50,6 +49,10 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Role role;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
     // 회원 탈퇴 로직
     public void deleteUser(String deleteReason) {
         this.isDeleted = true;
@@ -65,7 +68,6 @@ public class User extends BaseEntity {
         this.nickname = newNickname;
     }
 
-
     // 회원 비밀번호 변경 로직
     public void updatePassword(String newPassword) {
         if (newPassword == null || newPassword.isBlank()) {
@@ -73,5 +75,4 @@ public class User extends BaseEntity {
         }
         this.password = newPassword;
     }
-
 }

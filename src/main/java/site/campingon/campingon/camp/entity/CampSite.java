@@ -19,7 +19,7 @@ public class CampSite {
     @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "camp_id", nullable = false)
     private Camp camp; // 캠핑장 (N:1 관계)
 
