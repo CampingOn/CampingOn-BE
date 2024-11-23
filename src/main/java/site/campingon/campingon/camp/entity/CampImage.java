@@ -26,4 +26,3 @@ public class CampImage {
     @Column(name = "image_url", length = 255, nullable = false)
     private String imageUrl;
 }
-

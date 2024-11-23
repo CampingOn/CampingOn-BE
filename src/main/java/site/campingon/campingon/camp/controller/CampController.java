@@ -29,7 +29,6 @@ public class CampController {
     private final CampService campService;
     private final UserKeywordRepository userKeywordRepository;
 
-
     private static final int RECOMMENDED_CAMP_SIZE = 3;
     private static final int DEFAULT_PAGE_SIZE = 12;
     private static final int KEYWORD_MATCHED_PAGE_SIZE = 9;

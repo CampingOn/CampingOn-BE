@@ -39,5 +39,5 @@ public class CampSite {
     private String induty; // 업종 구분
 
     @Column(name = "indoor_facility", length = 255)
-    private String indoorFacility;
+    private String indoorFacility; // 내부시설
 }
