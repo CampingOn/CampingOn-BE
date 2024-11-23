@@ -19,7 +19,7 @@ public class CampImage {
     @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "camp_id", nullable = false)
     private Camp camp;
 
