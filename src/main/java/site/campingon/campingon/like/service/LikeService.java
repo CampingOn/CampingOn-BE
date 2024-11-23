@@ -18,23 +18,23 @@ public class LikeService {
     private final UserRepository userRepository;
     private final CampRepository campRepository;
 
-    @Transactional
-    public void toggleLike(Long userId, Long campId) {
-        Like like = likeRepository.findByUserIdAndCampId(userId, campId)
-                .orElseGet(() -> {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
-                    Camp camp = campRepository.findById(campId)
-                            .orElseThrow(() -> new IllegalArgumentException("캠핑장이 존재하지 않습니다."));
-
-                    return Like.builder()
-                            .user(user)
-                            .camp(camp)
-                            .isLike(false)
-                            .build();
-                });
-
-        like.setLike(!like.isLike());
-        likeRepository.save(like);
-    }
+//    @Transactional
+//    public void toggleLike(Long userId, Long campId) {
+//        Like like = likeRepository.findByUserIdAndCampId(userId, campId)
+//                .orElseGet(() -> {
+//                    User user = userRepository.findById(userId)
+//                            .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+//                    Camp camp = campRepository.findById(campId)
+//                            .orElseThrow(() -> new IllegalArgumentException("캠핑장이 존재하지 않습니다."));
+//
+//                    return Like.builder()
+//                            .user(user)
+//                            .camp(camp)
+//                            .isLike(false)
+//                            .build();
+//                });
+//
+//        like.setLike(!like.isLike());
+//        likeRepository.save(like);
+//    }
 }

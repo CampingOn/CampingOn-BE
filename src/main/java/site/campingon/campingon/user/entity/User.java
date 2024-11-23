@@ -2,15 +2,12 @@ package site.campingon.campingon.user.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.campingon.campingon.common.entity.BaseEntity;
-import site.campingon.campingon.like.entity.Like;
 
 @Entity
 @AllArgsConstructor
@@ -48,10 +45,6 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> likes = new ArrayList<>();
 
     // 회원 탈퇴 로직
     public void deleteUser(String deleteReason) {

@@ -88,7 +88,7 @@ public class CampController {
     @GetMapping("/{campId}")
     @PreAuthorize("isAuthenticated()")  // 로그인 확인
     public ResponseEntity<CampDetailResponseDto> getCampDetail(
-            @PathVariable Long campId
+            @PathVariable("campId") Long campId
     ) {
         CampDetailResponseDto camp = campService.getCampDetail(campId);
         return ResponseEntity.ok(camp);
@@ -98,7 +98,7 @@ public class CampController {
     @GetMapping("/{campId}/sites")
     @PreAuthorize("isAuthenticated()")  // 로그인 확인
     public ResponseEntity<List<CampSiteListResponseDto>> getCampSites(
-            @PathVariable Long campId
+            @PathVariable("campId") Long campId
     ) {
         List<CampSiteListResponseDto> sites = campService.getCampSites(campId);
         return ResponseEntity.ok(sites);

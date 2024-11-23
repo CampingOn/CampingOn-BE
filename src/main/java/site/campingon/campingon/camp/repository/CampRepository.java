@@ -39,9 +39,6 @@ public interface CampRepository extends JpaRepository<Camp, Long> {
     List<Camp> findRecommendedCampsByUserId(@Param("userId") Long userId, @Param("size") int size);
 
 
-    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM Like l WHERE l.camp.id = :campId AND l.user.id = :userId")
-    boolean isLikedByUser(@Param("campId") Long campId, @Param("userId") Long userId);
-
 
 
     @Query("SELECT c FROM Camp c " +

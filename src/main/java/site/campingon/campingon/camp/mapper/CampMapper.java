@@ -14,19 +14,16 @@ import java.util.stream.Collectors;
 public interface CampMapper {
 
     // Camp -> CampListResponseDto로 매핑
-    @Mapping(target = "id", source = "camp.id")
-    @Mapping(target = "name", source = "camp.campName")
+    @Mapping(target = "name", source = "campName")
     @Mapping(target = "keywords", source = "keywords", qualifiedByName = "keywordsToStringList")
     @Mapping(target = "address", source = "campAddr", qualifiedByName = "addressToString")
-    @Mapping(target = "isLike", source = "isLike")
-    CampListResponseDto toCampListDto(Camp camp, CampAddr campAddr, List<CampKeyword> keywords, boolean isLike);
+    CampListResponseDto toCampListDto(Camp camp);
 
-    @Mapping(target = "id", source = "camp.id")
-    @Mapping(target = "name", source = "camp.campName")
+    @Mapping(target = "name", source = "campName")
     @Mapping(target = "address", source = "campAddr", qualifiedByName = "addressToString")
     @Mapping(target = "recommendCnt", source = "campInfo.recommendCnt")
     @Mapping(target = "likeCnt", source = "campInfo.likeCnt")
-    CampDetailResponseDto toCampDetailDto(Camp camp, CampAddr campAddr, List<CampImage> campImages, List<CampKeyword> keywords, CampInfo campInfo);
+    CampDetailResponseDto toCampDetailDto(Camp camp);
 
     CampSiteListResponseDto toCampSiteListDto(CampSite campSite);
 
@@ -41,4 +38,5 @@ public interface CampMapper {
                 .map(CampKeyword::getKeyword)
                 .toList();
     }
+
 }

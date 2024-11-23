@@ -3,10 +3,6 @@ package site.campingon.campingon.camp.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import site.campingon.campingon.common.entity.BaseEntity;
-import site.campingon.campingon.like.entity.Like;
-import site.campingon.campingon.user.entity.User;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -44,19 +40,14 @@ public class Camp extends BaseEntity {
     @Column(name = "thumb_image", length = 255)
     private String thumbImage; // 썸네일 이미지
 
-    @Builder.Default
-    @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CampKeyword> keywords = new ArrayList<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> likes = new ArrayList<>();
+    @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CampKeyword> keywords;
 
-    @OneToOne(mappedBy = "camp", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
     private CampAddr campAddr;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private CampInfo campInfo;
 
 }
