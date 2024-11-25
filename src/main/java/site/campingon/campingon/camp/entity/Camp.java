@@ -2,6 +2,7 @@ package site.campingon.campingon.camp.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import site.campingon.campingon.bookmark.entity.Bookmark;
 import site.campingon.campingon.common.entity.BaseEntity;
 
 import java.util.List;
@@ -52,5 +53,8 @@ public class Camp extends BaseEntity {
 
   @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private CampInfo campInfo;
+
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Bookmark> bookmarks;
 
 }

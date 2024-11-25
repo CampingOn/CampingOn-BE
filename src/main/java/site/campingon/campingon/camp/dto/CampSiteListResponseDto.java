@@ -11,7 +11,6 @@ import java.time.LocalTime;
 @Builder
 public class CampSiteListResponseDto {
   private Long siteId;
-  private String roomName;
   private Integer maxPeople;
   private Integer price;
   private String imageUrl;

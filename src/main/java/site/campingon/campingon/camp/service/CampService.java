@@ -14,7 +14,7 @@ import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
-import site.campingon.campingon.bookmark.repository.BookMarkRepository;
+import site.campingon.campingon.bookmark.repository.BookmarkRepository;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class CampService {
   private final CampRepository campRepository;
   private final CampSiteRepository campSiteRepository;
   private final UserKeywordRepository userKeywordRepository;
-  private final BookMarkRepository bookMarkRepository;
+  private final BookmarkRepository bookMarkRepository;
   private final CampMapper campMapper;
 
   // 추천 캠핑장 조회 (페이지네이션 - 횡스크롤 3개)
@@ -40,7 +40,7 @@ public class CampService {
     }
 
     // 키워드 매칭된 캠핑장을 페이지네이션으로 조회
-    Page<Camp> recommendedCamps = campRepository.findRecommendedCampsByKeywords(userKeywords, pageable);
+    Page<Camp> recommendedCamps = campRepository.findMatchedCampsByKeywords(userKeywords, pageable);
 
     List<CampListResponseDto> campDtos = recommendedCamps.getContent().stream()
         .map(camp -> {
@@ -85,4 +85,18 @@ public class CampService {
         .collect(Collectors.toList());
   }
 
+  // 사용자의 찜한 캠핑장 목록 조회
+  public Page<CampListResponseDto> getBookmarkedCamps(Long userId, Pageable pageable) {
+    Page<Camp> bookmarkedCamps = campRepository.findByBookmarks_User_IdAndBookmarks_IsMarkedTrue(userId, pageable);
+
+    List<CampListResponseDto> campDtos = bookmarkedCamps.getContent().stream()
+        .map(camp -> {
+          CampListResponseDto dto = campMapper.toCampListDto(camp);
+          dto.setMarked(true);
+          return dto;
+        })
+        .collect(Collectors.toList());
+
+    return new PageImpl<>(campDtos, pageable, bookmarkedCamps.getTotalElements());
+  }
 }

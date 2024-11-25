@@ -63,6 +63,7 @@ public class CampController {
   }
 
 /*
+  // TODO: NoSQL을 이용한 검색 기능 구현 & 엘라스틱 서치
   // 검색한 캠핑장 목록 (페이지네이션)
   @GetMapping("/search")
   @PreAuthorize("isAuthenticated()")  // 로그인 확인
@@ -97,32 +98,17 @@ public class CampController {
   }
 
 
-/*  // 찜하기
-  @PostMapping("/{campId}/bookmarks")
-  public ResponseEntity<Void> likeCamp(
-      @PathVariable Long campId,
-      UserDto currentUser
-  ) {
-
-  }
-
-  // 찜 해제
-  @DeleteMapping("/{campId}/bookmarks")
-  public ResponseEntity<Void> unlikeCamp(
-      @PathVariable Long campId,
-      UserDto currentUser
-  ) {
-
-  }
-
   // 사용자 찜 목록 조회
   @GetMapping("/bookmarked")
-  public ResponseEntity<List<CampListResponseDto>> getLikedCamps(
-      UserDto currentUser
+  public ResponseEntity<Page<CampListResponseDto>> getBookmarkedCamps(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "3") int size,
+      @AuthenticationPrincipal UserDetails userDetails
   ) {
-    return ResponseEntity.ok(
-        campService.getLikedCamps(currentUser.getUserId())
-    );
-  }*/
+    User user = (User) userDetails;
+    PageRequest pageRequest = PageRequest.of(page, size);
+
+    return ResponseEntity.ok(campService.getBookmarkedCamps(user.getId(), pageRequest));
+  }
 
 }

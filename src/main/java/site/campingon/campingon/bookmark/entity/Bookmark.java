@@ -1,5 +1,6 @@
 package site.campingon.campingon.bookmark.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,13 +15,14 @@ import site.campingon.campingon.user.entity.User;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookMark {
+public class Bookmark {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(columnDefinition = "INT UNSIGNED")
   private Long id;
 
   @ManyToOne
+  @JsonIgnore
   @JoinColumn(name = "camp_id", nullable = false)
   private Camp camp;
 

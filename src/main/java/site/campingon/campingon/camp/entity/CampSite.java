@@ -23,9 +23,6 @@ public class CampSite {
     @JoinColumn(name = "camp_id", nullable = false)
     private Camp camp; // 캠핑장 (N:1 관계)
 
-    @Column(name = "room_name", length = 20, nullable = false)
-    private String roomName; // 캠핑지 이름
-
     @Column(name = "maximum_people", nullable = false)
     private Integer maximumPeople; // 최대 수용 인원
 
