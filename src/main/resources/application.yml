@@ -29,6 +29,14 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile, email
+  profiles:
+    active: local #logback-spring springProfile 설정
 
 public-data:
   go-camping: ${GO_CAMPING_SERVICE_KEY}
+
+logging:
+  level:
+    root: INFO # 전체 로그 레벨을 INFO로 설정
+    org.springframework: WARN # Spring 관련 로그는 WARN 이상만 표시
+    site.campingon.campingon.common.aop: DEBUG  # 글로벌 AOP 로깅레벨 설정
