@@ -2,6 +2,8 @@ package site.campingon.campingon.camp.mapper;
 
 import org.mapstruct.*;
 import site.campingon.campingon.camp.dto.*;
+import site.campingon.campingon.camp.dto.admin.CreateCampDetailRequestDto;
+import site.campingon.campingon.camp.dto.admin.UpdateCampDetailRequestDto;
 import site.campingon.campingon.camp.entity.*;
 
 import java.util.List;
@@ -13,28 +15,33 @@ public interface CampMapper {
   // Camp -> CampListResponseDto로 매핑
   @Mapping(target = "name", source = "campName")
   @Mapping(target = "keywords", source = "keywords", qualifiedByName = "keywordsToStringList")
-  @Mapping(target = "address", source = "campAddr", qualifiedByName = "addressToString")
+  @Mapping(target = "address", source = "campAddr.streetAddr")
   CampListResponseDto toCampListDto(Camp camp);
 
   // Camp -> CampDetailResponseDto 매핑
   @Mapping(target = "name", source = "campName")
-  @Mapping(target = "address", source = "campAddr", qualifiedByName = "addressToString")
+  @Mapping(target = "address", source = "campAddr.streetAddr")
   @Mapping(target = "recommendCnt", source = "campInfo.recommendCnt")
-  @Mapping(target = "likeCnt", source = "campInfo.likeCnt")
+  @Mapping(target = "bookmarkCnt", source = "campInfo.bookmarkCnt")
   CampDetailResponseDto toCampDetailDto(Camp camp);
 
   CampSiteListResponseDto toCampSiteListDto(CampSite campSite);
 
-  @Named("addressToString")
-  default String addressToString(CampAddr address) {
-    return address != null ? address.getFullAddress() : null;
-  }
-
   @Named("keywordsToStringList")
   default List<String> keywordsToStringList(List<CampKeyword> keywords) {
     return keywords.stream()
-        .map(CampKeyword::getKeyword)
-        .toList();
+            .map(CampKeyword::getKeyword)
+            .toList();
   }
 
+  // 업데이트 로직을 위한 메서드
+  void updateCampFromDto(Camp updatedCamp, @MappingTarget Camp existingCamp);
+
+  // CreateCampDetailRequestDto -> Camp
+  @Mapping(target = "campName", source = "name")
+  Camp toCampEntity(CreateCampDetailRequestDto createRequestDto);
+
+  // UpdateCampDetailRequestDto -> Camp
+  @Mapping(target = "campName", source = "name")
+  Camp toCampEntity(UpdateCampDetailRequestDto updateRequestDto);
 }
