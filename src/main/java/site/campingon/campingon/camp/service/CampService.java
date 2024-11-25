@@ -25,15 +25,15 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class CampService {
 
-    private final CampRepository campRepository;
-    private final CampSiteRepository campSiteRepository;
-    private final UserKeywordRepository userKeywordRepository;
-    private final BookMarkRepository bookMarkRepository;
-    private final CampMapper campMapper;
+  private final CampRepository campRepository;
+  private final CampSiteRepository campSiteRepository;
+  private final UserKeywordRepository userKeywordRepository;
+  private final BookMarkRepository bookMarkRepository;
+  private final CampMapper campMapper;
 
-    // 추천 캠핑장 조회 (페이지네이션 - 횡스크롤 3개)
-    public Page<CampListResponseDto> getMatchedCampsByKeywords(Long userId, Pageable pageable) {
-        List<String> userKeywords = userKeywordRepository.findKeywordsByUserId(userId);
+  // 추천 캠핑장 조회 (페이지네이션 - 횡스크롤 3개)
+  public Page<CampListResponseDto> getMatchedCampsByKeywords(Long userId, Pageable pageable) {
+    List<String> userKeywords = userKeywordRepository.findKeywordsByUserId(userId);
 
         if (userKeywords.isEmpty()) {
             return Page.empty(pageable);
@@ -57,13 +57,13 @@ public class CampService {
     public Page<CampListResponseDto> getPopularCamps(Long userId, Pageable pageable) {
         Page<Camp> camps = campRepository.findPopularCamps(pageable);
 
-        List<CampListResponseDto> campDtos = camps.getContent().stream()
-                .map(camp -> {
-                    CampListResponseDto dto = campMapper.toCampListDto(camp);
-                    dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
-                    return dto;
-                })
-                .collect(Collectors.toList());
+    List<CampListResponseDto> campDtos = recommendedCamps.getContent().stream()
+        .map(camp -> {
+          CampListResponseDto dto = campMapper.toCampListDto(camp);
+          dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
+          return dto;
+        })
+        .collect(Collectors.toList());
 
         return new PageImpl<>(campDtos, pageable, camps.getTotalElements());
     }
@@ -72,9 +72,13 @@ public class CampService {
     public CampDetailResponseDto getCampDetail(Long campId) {
         Camp camp = campRepository.findById(campId)
                 .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
-
-        return campMapper.toCampDetailDto(camp);
-    }
+    List<CampListResponseDto> campDtos = camps.getContent().stream()
+        .map(camp -> {
+          CampListResponseDto dto = campMapper.toCampListDto(camp);
+          dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
+          return dto;
+        })
+        .collect(Collectors.toList());
 
     // 캠핑장의 캠핑지 목록 조회
     public List<CampSiteListResponseDto> getCampSites(Long campId) {

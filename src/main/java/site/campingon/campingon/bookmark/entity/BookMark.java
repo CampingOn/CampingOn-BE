@@ -1,4 +1,4 @@
-package site.campingon.campingon.like.entity;
+package site.campingon.campingon.bookmark.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import site.campingon.campingon.user.entity.User;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Like {
+public class BookMark {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(columnDefinition = "INT UNSIGNED")
@@ -29,12 +29,7 @@ public class Like {
   private User user;
 
   @Builder.Default
-  @Column(name = "is_like", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")  // 새로 찜관계 DB 삽입 시 true
-  private boolean isLike = true;  // 객체 생성 시 true
+  @Column(name = "is_marked", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")  // 새로 찜관계 DB 삽입 시 true
+  private boolean isMarked = true;  // 객체 생성 시 true
 
-  @Builder
-  public Like(Camp camp, User user) {
-    this.camp = camp;
-    this.user = user;
-  }
 }

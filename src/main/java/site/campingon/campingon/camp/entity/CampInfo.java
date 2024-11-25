@@ -26,6 +26,6 @@ public class CampInfo {
     @Column(name = "recommend_cnt")
     private Integer recommendCnt;
 
-    @Column(name = "like_cnt")
-    private Integer likeCnt;
+    @Column(name = "bookmark_cnt")
+    private Integer bookmarkCnt;
 }

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "camp_site")
@@ -36,8 +36,12 @@ public class CampSite {
     private String imageUrl; // 캠핑지 이미지
 
     @Column(length = 100, nullable = false)
-    private String induty; // 업종 구분
+    private String type; // 업종 구분
 
     @Column(name = "indoor_facility", length = 255)
     private String indoorFacility;
+
+    // @Builder.Default
+    @Column(name = "is_available", nullable = false)
+    private boolean isAvailable;
 }

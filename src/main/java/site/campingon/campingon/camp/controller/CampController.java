@@ -15,7 +15,6 @@ import site.campingon.campingon.camp.service.CampService;
 import site.campingon.campingon.user.entity.User;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.access.prepost.PreAuthorize;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
 
 import java.util.*;
@@ -33,9 +32,8 @@ public class CampController {
   private static final int KEYWORD_MATCHED_PAGE_SIZE = 9;
 
   // 사용자 키워드 맞춤 캠핑장 목록 조회 (페이지네이션 - 횡스크롤)
-  @GetMapping("/recommended")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인
-  public ResponseEntity<Page<CampListResponseDto>> getRecommendedCamps(
+  @GetMapping("/matched")
+  public ResponseEntity<Page<CampListResponseDto>> getMatchedCamps(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "3") int size,
       @AuthenticationPrincipal UserDetails userDetails   // 추후 UserDto로 커스텀
@@ -43,17 +41,13 @@ public class CampController {
     User user = (User) userDetails;
     PageRequest pageRequest = PageRequest.of(page, size);
 
-    Page<CampListResponseDto> recommendedCamps = campService.getRecommendedCampsByKeywords(
-        user.getId(),
-        pageRequest
+    return ResponseEntity.ok(campService.getMatchedCampsByKeywords(
+        user.getId(), pageRequest)
     );
-
-    return ResponseEntity.ok(recommendedCamps);
   }
 
   // 캠핑장 인기 목록 조회 (페이지네이션)
   @GetMapping("/popular")
-  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Page<CampListResponseDto>> getPopularCamps(
       @RequestParam(defaultValue = "0") int page,
       @AuthenticationPrincipal UserDetails userDetails
@@ -88,28 +82,23 @@ public class CampController {
 
   // 캠핑장 상세 조회  -  찜 버튼 활성화 시 유저 확인 추가
   @GetMapping("/{campId}")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<CampDetailResponseDto> getCampDetail(
       @PathVariable("campId") Long campId
   ) {
-    CampDetailResponseDto camp = campService.getCampDetail(campId);
-    return ResponseEntity.ok(camp);
+    return ResponseEntity.ok(campService.getCampDetail(campId));
   }
 
   // 캠핑지 목록 조회
   @GetMapping("/{campId}/sites")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<List<CampSiteListResponseDto>> getCampSites(
       @PathVariable("campId") Long campId
   ) {
-    List<CampSiteListResponseDto> sites = campService.getCampSites(campId);
-    return ResponseEntity.ok(sites);
+    return ResponseEntity.ok(campService.getCampSites(campId));
   }
 
 
 /*  // 찜하기
-  @PostMapping("/{campId}/likes")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인
+  @PostMapping("/{campId}/bookmarks")
   public ResponseEntity<Void> likeCamp(
       @PathVariable Long campId,
       UserDto currentUser
@@ -118,8 +107,7 @@ public class CampController {
   }
 
   // 찜 해제
-  @DeleteMapping("/{campId}/likes")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인
+  @DeleteMapping("/{campId}/bookmarks")
   public ResponseEntity<Void> unlikeCamp(
       @PathVariable Long campId,
       UserDto currentUser
@@ -128,8 +116,7 @@ public class CampController {
   }
 
   // 사용자 찜 목록 조회
-  @GetMapping("/likes")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인
+  @GetMapping("/bookmarked")
   public ResponseEntity<List<CampListResponseDto>> getLikedCamps(
       UserDto currentUser
   ) {

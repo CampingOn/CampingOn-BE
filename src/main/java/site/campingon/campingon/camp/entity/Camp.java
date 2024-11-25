@@ -35,12 +35,14 @@ public class Camp extends BaseEntity {
   @Column(length = 100)
   private String homepage;
 
+  @Column(length = 100, nullable = false)
+  private String induty;  // 업종
+
   @Column(name = "outdoor_facility", length = 255)
-  private String outdoorFacility; // 부대 시설
+  private String outdoorFacility;  // 부대 시설
 
   @Column(name = "thumb_image", length = 255)
-  private String thumbImage; // 썸네일 이미지
-
+  private String thumbImage;  // 썸네일 이미지
 
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<CampKeyword> keywords;

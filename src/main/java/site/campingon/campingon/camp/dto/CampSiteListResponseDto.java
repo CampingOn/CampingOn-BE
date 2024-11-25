@@ -16,6 +16,7 @@ public class CampSiteListResponseDto {
   private Integer price;
   private String imageUrl;
   private String indoor_facility;
+  private String type;
 
   @Builder.Default  // 기본값 자동 설정
   private LocalTime checkInTime = LocalTime.of(15, 0);  // 15:00

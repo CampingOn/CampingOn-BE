@@ -93,7 +93,7 @@ public class GoCampingService {
                     .roomName(roomName)
                     .maximumPeople(4)   //todo 임시설정
                     .price(1000)    //todo 임시설정
-                    .induty(induty)
+                    .type(induty)
                     .indoorFacility(innerFacility)
                     .build();
 
