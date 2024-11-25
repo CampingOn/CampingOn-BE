@@ -2,6 +2,8 @@ package site.campingon.campingon.camp.mapper;
 
 import org.mapstruct.*;
 import site.campingon.campingon.camp.dto.*;
+import site.campingon.campingon.camp.dto.admin.CampUpdateRequestDto;
+import site.campingon.campingon.camp.dto.admin.CampCreateRequestDto;
 import site.campingon.campingon.camp.entity.*;
 
 import java.util.List;
@@ -28,8 +30,18 @@ public interface CampMapper {
   @Named("keywordsToStringList")
   default List<String> keywordsToStringList(List<CampKeyword> keywords) {
     return keywords.stream()
-        .map(CampKeyword::getKeyword)
-        .toList();
+            .map(CampKeyword::getKeyword)
+            .toList();
   }
 
+  // 업데이트 로직을 위한 메서드
+  void updateCampFromDto(Camp updatedCamp, @MappingTarget Camp existingCamp);
+
+  // CampCreateRequestDto -> Camp
+  @Mapping(target = "campName", source = "name")
+  Camp toCampEntity(CampCreateRequestDto createRequestDto);
+
+  // CampUpdateRequestDto -> Camp
+  @Mapping(target = "campName", source = "name")
+  Camp toCampEntity(CampUpdateRequestDto updateRequestDto);
 }
