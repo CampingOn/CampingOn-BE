@@ -5,7 +5,7 @@ public class PublicDataConstants {
     public static final String CONTENT_TYPE = "json";
     public static final String MOBILE_APP = "Camping_On";
     public static final String MOBILE_OS = "ETC";
-
-
-
+    public static final String SYNC_STATUS_UPDATE = "U";
+    public static final String SYNC_STATUS_NEW = "A";
+    public static final String SYNC_STATUS_DELETE = "D";
 }

@@ -45,6 +45,9 @@ class GoCampingServiceTest {
     private GoCampingMapper goCampingMapper;
 
     @Mock
+    private GoCampingProviderService goCampingProviderService;
+
+    @Mock
     private CampAddrRepository campAddrRepository;
 
     @Mock
@@ -111,7 +114,7 @@ class GoCampingServiceTest {
         doReturn(goCampingDataDto).when(restTemplate).getForObject(any(URI.class), eq(GoCampingDataDto.class));
 
         //when
-        GoCampingDataDto result = goCampingService.getAndConvertToGoCampingDataDto("numOfRows", numOfRows, "pageNo", pageNo);
+        GoCampingDataDto result = goCampingService.getAndConvertToGoCampingDataDto(GoCampingPath.BASED_LIST, "numOfRows", numOfRows, "pageNo", pageNo);
 
         // then
         assertThat(result).isNotNull();
@@ -168,7 +171,7 @@ class GoCampingServiceTest {
         String param2Value = "1";
 
         // When
-        URI uri = goCampingService.createUri(goCampingPath, param1Key, param1Value, param2Key, param2Value);
+        URI uri = goCampingProviderService.createUri(goCampingPath, param1Key, param1Value, param2Key, param2Value);
 
         // Then
         String expectedUriString = PublicDataConstants.GO_CAMPING_END_POINT + goCampingPath.getPath() +

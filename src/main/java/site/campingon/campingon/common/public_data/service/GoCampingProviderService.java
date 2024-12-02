@@ -25,7 +25,7 @@ import static site.campingon.campingon.common.public_data.PublicDataConstants.MO
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class GoCampingCampSiteService {
+public class GoCampingProviderService {
     private final CampSiteRepository campSiteRepository;
     private final CampIndutyRepository campIndutyRepository;
 

@@ -4,6 +4,7 @@ import org.locationtech.jts.io.ParseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingImageDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingImageParsedResponseDto;
@@ -27,11 +28,12 @@ public class GoCampingController {
     //공공데이터 기반 캠프관련 엔티티 생성 및 DB 저장
     @PostMapping("/basedList")
     public ResponseEntity<List<GoCampingParsedResponseDto>> createCampByGoCampingBasedList(
-            @RequestParam("numOfRows") Long numOfRows,  //몇개의 데이터 갖고올지
-            @RequestParam("pageNo") Long pageNo)    //몇번부터 시작하는지
+            @RequestParam("numOfRows") Long numOfRows,  //한 페이지 결과 수
+            @RequestParam("pageNo") Long pageNo)    //현재 페이지 번호
             throws URISyntaxException, ParseException {
         //공공데이터를 조회하고 반환
         GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
+                GoCampingPath.BASED_LIST,
                 "numOfRows", numOfRows.toString(),
                 "pageNo", pageNo.toString());
 
@@ -54,7 +56,7 @@ public class GoCampingController {
 
         //CampImage 를 생성하고 DB에 저장한다.
         List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
-                = goCampingService.createCampImageByGoCampingImageData(goCampingImageDto);
+                = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
     }

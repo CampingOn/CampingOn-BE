@@ -43,13 +43,16 @@ public class Camp{
   private String thumbImage;  // 썸네일 이미지
 
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CampKeyword> keywords;
+  @Builder.Default
+  private List<CampKeyword> keywords=new ArrayList<>();
 
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CampImage> images;
+  @Builder.Default
+  private List<CampImage> images=new ArrayList<>();
 
-  @OneToMany(mappedBy = "camp",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private List<CampInduty> induty;  // 업종
+  @OneToMany(mappedBy = "camp",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+  @Builder.Default
+  private List<CampInduty> induty=new ArrayList<>();  // 업종
 
   @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampAddr campAddr;
@@ -57,9 +60,9 @@ public class Camp{
   @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampInfo campInfo;
 
-  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
-  private List<Bookmark> bookmarks = new ArrayList<>();
+  private List<Bookmark> bookmarks=new ArrayList<>();
 
   @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
   private LocalDateTime createdAt;
