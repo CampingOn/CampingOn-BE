@@ -2,6 +2,9 @@ package site.campingon.campingon.user.service;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +29,9 @@ import site.campingon.campingon.user.entity.User;
 @Slf4j
 public class UserAuthService {
 
+    private final Map<String, ReentrantLock> locks = new ConcurrentHashMap<>();
+
+
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
@@ -49,23 +55,29 @@ public class UserAuthService {
     // 토큰 재발급
     @Transactional
     public JwtToken refresh(String refreshToken) {
-        log.info("Refresh Token을 사용한 Access Token 재발급");
-        if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new GlobalException(ErrorCode.INVALID_TOKEN);
+        ReentrantLock lock = locks.computeIfAbsent(refreshToken, key -> new ReentrantLock());
+        lock.lock();
+
+        try{
+            log.info("Refresh Token을 사용한 Access Token 재발급");
+
+            RefreshToken storedRefreshToken = refreshTokenService.getRefreshTokenByToken(refreshToken)
+                .orElseThrow(() -> new GlobalException(ErrorCode.NO_TOKEN));
+
+            if (storedRefreshToken.getExp().isBefore(LocalDateTime.now())) {
+                throw new GlobalException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+            }
+
+            User user = userService.findUserByEmail(storedRefreshToken.getEmail());
+            Authentication authentication = createAuthentication(user);
+
+            return jwtTokenProvider.generateToken(authentication);
+
+        } finally {
+            lock.unlock();
+            locks.remove(refreshToken);
         }
-        RefreshToken storedRefreshToken = refreshTokenService.getRefreshTokenByToken(refreshToken)
-            .orElseThrow(() -> new GlobalException(ErrorCode.NO_TOKEN));
 
-        if (storedRefreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new GlobalException(ErrorCode.REFRESH_TOKEN_EXPIRED);
-        }
-
-        User user = userService.findUserByEmail(storedRefreshToken.getEmail());
-        Authentication authentication = createAuthentication(user);
-
-        JwtToken newJwtToken = jwtTokenProvider.generateToken(authentication);
-        refreshTokenService.saveOrUpdateRefreshToken(user.getEmail(), newJwtToken.getRefreshToken(), refreshTokenExpired);
-        return newJwtToken;
     }
 
     // 로그 아웃

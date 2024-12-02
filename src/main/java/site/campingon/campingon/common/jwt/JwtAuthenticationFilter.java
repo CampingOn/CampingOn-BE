@@ -1,14 +1,11 @@
 package site.campingon.campingon.common.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,24 +36,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith(BEARER)) {
             String token = authHeader.substring(BEARER.length());
             // 토큰 검증
-            try {
-                if (jwtTokenProvider.validateToken(token)) {
-                    // 유효한 토큰: 유저 정보 가져옴
-                    Authentication authentication = jwtTokenProvider.getAuthentication(token);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            } catch (ExpiredJwtException e) {
-                // access token 만료: error 전달
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "access token expired");
-                error.put("code", "401");
-                error.put("status", "UNAUTHORIZED");
-                response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write(objectMapper.writeValueAsString(error));
-                return;
+            if (jwtTokenProvider.validateToken(token)) {
+                // 유효한 토큰: 유저 정보 가져옴
+                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-
         }
 
         filterChain.doFilter(request, response);

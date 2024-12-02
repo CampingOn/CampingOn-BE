@@ -11,12 +11,14 @@ import java.security.Key;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
@@ -36,11 +38,16 @@ public class JwtTokenProvider {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
+
     @Value("${jwt.access-expired}")
     private Long accessTokenExpired;
 
     @Value("${jwt.refresh-expired}")
     private Long refreshTokenExpired;
+
 
     public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey) {
         byte[] keyBytes = secretKey.getBytes();
@@ -52,7 +59,6 @@ public class JwtTokenProvider {
 
         long now = (new Date()).getTime();
         Date accessTokenExpiration = new Date(now + accessTokenExpired * 1000);
-        Date refreshTokenExpiration = new Date(now + refreshTokenExpired * 1000);
 
         CustomUserPrincipal userPrincipal = (CustomUserPrincipal) authentication.getPrincipal();
 
@@ -65,13 +71,12 @@ public class JwtTokenProvider {
             .signWith(secretKey, SignatureAlgorithm.HS256) // 서명
             .compact();
 
-        // Refresh Token 생성 (주로 만료 시간만 포함)
-        String refreshToken = Jwts.builder()
-            .setSubject(userPrincipal.getEmail()) // 사용자 식별용 정보
-            .setExpiration(refreshTokenExpiration) // 만료 시간
-            .signWith(secretKey, SignatureAlgorithm.HS256) // 서명
-            .compact();
+        // Refresh Token 생성 (임의의 값 생성)
+        String refreshToken = UUID.randomUUID().toString();
 
+        // DB에 저장
+        refreshTokenService.saveOrUpdateRefreshToken(userPrincipal.getEmail(), refreshToken,
+            refreshTokenExpired);
 
         // JWT Token 객체 반환
         return JwtToken.builder()
@@ -82,17 +87,7 @@ public class JwtTokenProvider {
 
     }
 
-    // 리프레시 토큰 생성
-    public String createRefreshToken(String email) {
-        long now = (new Date()).getTime();
-        Date refreshTokenExpiration = new Date(now + refreshTokenExpired * 1000);
 
-        return Jwts.builder()
-            .setSubject(email) // 토큰의 Subject에 사용자 이메일 저장
-            .setExpiration(refreshTokenExpiration) // 만료 시간 설정
-            .signWith(secretKey, SignatureAlgorithm.HS256) // 서명 알고리즘과 키 설정
-            .compact();
-    }
 /*
 
     // OAuth2 사용자 토큰 생성 메서드
@@ -176,6 +171,7 @@ public class JwtTokenProvider {
     }
 
     // 토큰 정보 검증
+// 토큰 정보 검증
     public boolean validateToken(String token) {
         log.info("validateToken start");
         try {
@@ -183,16 +179,18 @@ public class JwtTokenProvider {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
+            throw new AuthenticationException("Invalid JWT Token", e) {}; // 예외를 래핑
         } catch (ExpiredJwtException e) {
-            // refresh token 활용해서 재발급
             log.info("Expired JWT Token", e);
-            throw e;
+            throw new AuthenticationException("Expired JWT Token", e) {}; // 예외를 래핑
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
+            throw new AuthenticationException("Unsupported JWT Token", e) {}; // 예외를 래핑
         } catch (IllegalArgumentException e) {
             log.info("JWT claims string is empty.", e);
+            throw new AuthenticationException("JWT claims string is empty", e) {}; // 예외를 래핑
+
         }
-        return false;
     }
 
     public Claims parseClaims(String accessToken) {

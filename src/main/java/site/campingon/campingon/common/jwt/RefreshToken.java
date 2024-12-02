@@ -32,13 +32,13 @@ public class RefreshToken extends BaseEntity {
     private String email;
 
     @Column(nullable = false)
-    private LocalDateTime expiryDate;
+    private LocalDateTime exp;
 
 
     // 토큰 업데이트
-    public void update(String refreshToken,LocalDateTime expiryDate) {
+    public void update(String refreshToken, LocalDateTime exp) {
         this.token = refreshToken;
-        this.expiryDate = expiryDate;
+        this.exp = exp;
     }
 
 }

@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
+import site.campingon.campingon.common.jwt.CustomAccessDeniedHandler;
+import site.campingon.campingon.common.jwt.CustomAuthenticationEntryPoint;
 import site.campingon.campingon.common.oauth.handler.CustomOAuth2FailureHandler;
 import site.campingon.campingon.common.oauth.service.CustomOAuth2UserService;
 import site.campingon.campingon.common.jwt.CustomUserDetailsService;
@@ -62,6 +64,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/","/h2-console/**").permitAll()
                         .anyRequest().permitAll());
+
+        // 예외 처리
+        http
+            .exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper)) // 인증 실패 처리
+                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))); // 인가 실패 처리
 
         // JwtFilter 추가
         http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, objectMapper), UsernamePasswordAuthenticationFilter.class);

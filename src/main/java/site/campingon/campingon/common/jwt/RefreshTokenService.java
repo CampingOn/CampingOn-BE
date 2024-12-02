@@ -25,7 +25,7 @@ public class RefreshTokenService {
                 () -> refreshTokenRepository.save(RefreshToken.builder()
                     .email(email)
                     .token(refreshToken)
-                    .expiryDate(LocalDateTime.now().plusSeconds(refreshTokenExpired))
+                    .exp(LocalDateTime.now().plusSeconds(refreshTokenExpired))
                     .build())
             );
     }
