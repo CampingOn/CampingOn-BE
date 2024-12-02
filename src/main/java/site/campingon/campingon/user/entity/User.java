@@ -77,18 +77,6 @@ public class User extends BaseEntity {
 
     @Override
     public String toString() {
-        int maxKeywordsToShow = 3; // 출력할 최대 항목 수
-        String keywordsSummary = keywords.stream()
-            .limit(maxKeywordsToShow) // 최대 3개만 선택
-            .map(UserKeyword::toString) // 각 항목을 문자열로 변환
-            .toList()
-            .toString();
-
-        // 추가로 더 많은 키워드가 있는 경우 처리
-        if (keywords.size() > maxKeywordsToShow) {
-            keywordsSummary = keywordsSummary.substring(0, keywordsSummary.length() - 1) // 마지막 ']' 제거
-                + ", ... (" + (keywords.size() - maxKeywordsToShow) + " more)]"; // 추가된 항목 표시
-        }
 
         return "[User(" +
             "id=" + id +
@@ -100,7 +88,6 @@ public class User extends BaseEntity {
             ", deleteReason=" + deleteReason +
             ", deletedAt=" + deletedAt +
             ", role=" + role +
-            ", keywords=" + keywordsSummary +
             ")]";
     }
 }
