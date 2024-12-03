@@ -21,5 +21,6 @@ public class CampListResponseDto {
   private List<String> keywords;   // 캠핑장 키워드
 
   private boolean isMarked;  // 찜 여부
+  private String userName;
 
 }

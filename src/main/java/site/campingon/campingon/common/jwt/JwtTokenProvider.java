@@ -66,6 +66,7 @@ public class JwtTokenProvider {
             .setSubject(userPrincipal.getEmail()) // 이메일을 Subject로 설정
             .claim("nickname", userPrincipal.getNickname()) // 닉네임
             .claim("role", userPrincipal.getRole()) // 사용자 역할(Role)
+            .claim("name",userPrincipal.getName())
             .setExpiration(accessTokenExpiration) // 만료 시간
             .signWith(secretKey, SignatureAlgorithm.HS256) // 서명
             .compact();
@@ -144,6 +145,7 @@ public class JwtTokenProvider {
         String email = claims.getSubject(); // 토큰 subject에서 email 추출
         String nickname = claims.get("nickname").toString(); // nickname 추출
         String password = claims.get("password", String.class);
+        String name = claims.get("name", String.class);
 
         String roleName = claims.get("role", String.class); // 문자열로 읽기
 
@@ -158,7 +160,7 @@ public class JwtTokenProvider {
         Long id = user.getId();
 
         // CustomUserDetails 생성
-        CustomUserDetails userDetails = new CustomUserDetails(id, email, nickname, role, password);
+        CustomUserDetails userDetails = new CustomUserDetails(id, email, nickname, role, password, name);
 
         // 문자열을 GrantedAuthority로 변환
         Collection<? extends GrantedAuthority> authorities =

@@ -16,13 +16,15 @@ public class CustomUserDetails implements UserDetails, CustomUserPrincipal {
     private final String nickname;
     private final Role role;
     private final String password;
+    private final String name;
 
-    public CustomUserDetails(Long id, String email, String nickname, Role role, String password) {
+    public CustomUserDetails(Long id, String email, String nickname, Role role, String password, String name) {
         this.id = id;
         this.email = email;
         this.nickname = nickname;
         this.role = role;
         this.password = password;
+        this.name = name;
     }
 
     @Override

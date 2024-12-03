@@ -25,6 +25,8 @@ public class CustomUserDetailsService implements UserDetailsService {
             .orElseThrow(() -> new UsernameNotFoundException("해당하는 정보의 사용자를 찾을 수 없습니다."));
 
         // CustomUserDetails 생성
-        return new CustomUserDetails(user.getId(), user.getEmail(), user.getNickname(), user.getRole(), user.getPassword());
+        return new CustomUserDetails(
+            user.getId(), user.getEmail(), user.getNickname(), user.getRole(), user.getPassword(), user.getName()
+        );
     }
 }

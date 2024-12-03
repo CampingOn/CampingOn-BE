@@ -17,6 +17,7 @@ import site.campingon.campingon.camp.repository.mongodb.SearchInfoRepository;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
+import site.campingon.campingon.user.repository.UserRepository;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,9 +33,10 @@ public class CampService {
   private final UserKeywordRepository userKeywordRepository;
   private final BookmarkRepository bookMarkRepository;
   private final CampMapper campMapper;
+  private final UserRepository userRepository;
 
   // 추천 캠핑장 조회 (페이지네이션 - 횡스크롤 3개)
-  public Page<CampListResponseDto> getMatchedCampsByKeywords(Long userId, Pageable pageable) {
+  public Page<CampListResponseDto> getMatchedCampsByKeywords(String userName, Long userId, Pageable pageable) {
     List<String> userKeywords = userKeywordRepository.findKeywordsByUserId(userId);
 
     // 사용자에 저장된 키워드가 없는 경우
@@ -45,6 +47,7 @@ public class CampService {
     return campRepository.findMatchedCampsByKeywords(userKeywords, pageable)
         .map(camp -> {
           CampListResponseDto dto = campMapper.toCampListDto(camp);
+          dto.setName(userName);
           dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
           return dto;
         });

@@ -115,7 +115,7 @@ public class UserAuthService {
     // User 객체를 사용해 authentication 생성
     private Authentication createAuthentication(User user) {
         CustomUserDetails customUserDetails = new CustomUserDetails(
-            user.getId(), user.getEmail(), user.getNickname(), user.getRole(), user.getPassword());
+            user.getId(), user.getEmail(), user.getNickname(), user.getRole(), user.getPassword(),user.getName());
 
         return new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
     }

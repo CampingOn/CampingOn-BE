@@ -6,6 +6,7 @@ public interface CustomUserPrincipal {
     String getEmail();
     String getNickname();
     String getRole();
+    String getName();
     Map<String, Object> getAttributes();
 
 }
