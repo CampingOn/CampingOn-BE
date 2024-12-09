@@ -17,11 +17,20 @@ public interface ReviewMapper {
 
     // 리뷰 생성 매퍼
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", source = "reservation.user")
+    @Mapping(target = "campSite", source = "reservation.campSite")
+    @Mapping(target = "reservation", source = "reservation")
+    @Mapping(target = "camp", source = "camp")
+    // @Mapping(target = "reviewImages", ignore = true)
+    // @Mapping(target = "deletedAt", ignore = true)
     Review toEntity(ReviewCreateRequestDto requestDto, Camp camp, Reservation reservation);
 
+    @Mapping(target = "reviewId", source = "id")
+    @Mapping(target = "images", source = "reviewImages")
     ReviewResponseDto toResponseDto(Review review);
 
     // 리뷰 수정 매퍼
+    @Mapping(target = "title", source = "requestDto.title", defaultValue = "review.title")
     @Mapping(target = "content", source = "requestDto.content", defaultValue = "review.content")
     Review updateFromRequest(Review review, ReviewUpdateRequestDto requestDto);
 

@@ -1,5 +1,6 @@
 package site.campingon.campingon.review.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import site.campingon.campingon.camp.entity.Camp;
@@ -7,10 +8,11 @@ import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.reservation.entity.Reservation;
 import site.campingon.campingon.user.entity.User;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@ToString
+@ToString(exclude = "reservation")
 @Entity
 @Getter
 @Builder(toBuilder = true)
@@ -36,9 +38,13 @@ public class Review {
     @JoinColumn(name = "camp_site_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private CampSite campSite;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_id", nullable = false, columnDefinition = "INT UNSIGNED")
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "reservation_id", unique = true, nullable = false, columnDefinition = "INT UNSIGNED")
     private Reservation reservation;
+
+    @Column(length = 100, nullable = false)
+    private String title;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
@@ -50,4 +56,15 @@ public class Review {
     @Builder.Default
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> reviewImages = new ArrayList<>();
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
 }

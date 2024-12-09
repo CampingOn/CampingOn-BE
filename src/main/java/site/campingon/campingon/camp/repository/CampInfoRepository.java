@@ -6,5 +6,5 @@ import site.campingon.campingon.camp.entity.CampInfo;
 
 @Repository
 public interface CampInfoRepository extends JpaRepository<CampInfo, Long> {
-    CampInfo findByCampId(Long id);
+    boolean findByCampId(Long id);
 }

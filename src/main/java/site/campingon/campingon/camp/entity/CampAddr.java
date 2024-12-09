@@ -3,7 +3,6 @@ package site.campingon.campingon.camp.entity;
 
 import org.locationtech.jts.geom.Point;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +18,7 @@ public class CampAddr {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "BIGINT UNSIGNED")
+    @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 
     @OneToOne
@@ -35,16 +34,10 @@ public class CampAddr {
     @Column(length = 20)
     private String zipcode;  // 우편번호
 
-    /*@Column(nullable = false)
-    private Double longitude;  // mayX - 경도
-
-    @Column(nullable = false)
-    private Double latitude;  // maxY - 위도*/
-
     @Column(columnDefinition = "POINT SRID 4326", nullable = false) // MySQL POINT 유형 및 SRID 지정
     private Point location;
 
-    @Column(name = "street_addr", length = 50)
+    @Column(name = "street_addr", length = 100)
     private String streetAddr;   // 기본 도로명 주소
 
     @Column(name = "detailed_addr", length = 50)

@@ -1,9 +1,11 @@
 package site.campingon.campingon.common.public_data.controller;
 
-import org.locationtech.jts.io.ParseException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import site.campingon.campingon.common.exception.GlobalException;
+import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingImageDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingImageParsedResponseDto;
@@ -13,6 +15,8 @@ import site.campingon.campingon.common.public_data.service.GoCampingService;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import static site.campingon.campingon.common.exception.ErrorCode.*;
+
 /**
  * https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15101933
  * 공공데이터 고캠핑 정보 기반으로 캠프관련 엔티티 생성
@@ -20,41 +24,55 @@ import java.util.List;
 @RequestMapping("/api")
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class GoCampingController {
 
     private final GoCampingService goCampingService;
 
-    //공공데이터 기반 캠프관련 엔티티 생성 및 DB 저장
+    /**
+     * 고캠핑데이터 DB 저장
+     */
     @PostMapping("/basedList")
     public ResponseEntity<List<GoCampingParsedResponseDto>> createCampByGoCampingBasedList(
-            @RequestParam("numOfRows") Long numOfRows,  //몇개의 데이터 갖고올지
-            @RequestParam("pageNo") Long pageNo)    //몇번부터 시작하는지
-            throws URISyntaxException, ParseException {
-        //공공데이터를 조회하고 반환
-        GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
-                "numOfRows", numOfRows.toString(),
-                "pageNo", pageNo.toString());
+            @RequestParam("numOfRows") Long numOfRows,  //한 페이지 결과 수
+            @RequestParam("pageNo") Long pageNo)    //현재 페이지 번호
+    {
+        try {
+            //공공데이터를 조회하고 반환
+            GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
+                    GoCampingPath.BASED_LIST,
+                    "numOfRows", numOfRows.toString(),
+                    "pageNo", pageNo.toString());
 
-        //Camp 관련 엔티티를 생성하고 DB에 저장한다.
-        List<GoCampingParsedResponseDto> goCampingParsedResponseDtos
-                = goCampingService.createCampByGoCampingData(goCampingDataDto);
+            //Camp 관련 엔티티를 생성하고 DB에 저장한다.
+            List<GoCampingParsedResponseDto> goCampingParsedResponseDtos
+                    = goCampingService.createOrUpdateCampByGoCampingData(goCampingDataDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
+            return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
+        } catch (Exception e) { //
+            log.error("고캠핑데이터 저장 실패, 고캠핑 API 파라미터나 서비스키를 다시 확인해주세요");
+            throw new GlobalException(GO_CAMPING_BAD_REQUEST);
+        }
     }
 
     /**
      * DB에 Camp Id를 가져와서 Id가 가지고있는 이미지를 호출 및 저장
-     * */
+     */
     @PostMapping("/imageList")
     public ResponseEntity<List<List<GoCampingImageParsedResponseDto>>> createCampImageByGoCampingImageList(
-            @RequestParam("imageCnt") Long imageCnt)    //몇개의 이미지개수를 갖고올지
+            @RequestParam("imageCnt") long imageCnt)    //몇개의 이미지개수를 갖고올지
             throws URISyntaxException {
+
         //공공데이터를 조회하고 dto로 변환
-        List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToGoCampingImageDataDto(imageCnt);
+        List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToAllGoCampingImageDataDto(imageCnt);
 
         //CampImage 를 생성하고 DB에 저장한다.
         List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
-                = goCampingService.createCampImageByGoCampingImageData(goCampingImageDto);
+                = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
+
+        if (goCampingParsedResponseDtos == null) {
+            throw new GlobalException(GO_CAMPING_DATA_NO_CONTENT);
+        }
 
         return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
     }

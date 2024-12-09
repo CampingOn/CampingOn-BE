@@ -32,6 +32,8 @@ public class GoCampingDataDto {
     @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
     public static class Body {
         private Items items;
+        private long numOfRows;
+        private long totalCount;
     }
 
     @Getter

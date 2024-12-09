@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: camping-on:latest
+    container_name: camping-on
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,s3Bucket
+      TZ: Asia/Seoul
+    volumes:
+      - ./logs:app/logs # 로그 마운트
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    name: app-network

@@ -10,15 +10,15 @@ public interface ReservationService {
     Page<ReservationResponseDto> getReservations(Long userId, Pageable pageable);
 
     // 예약완료 직후 확인을 위해 예약 정보 조회
-    ReservationResponseDto getReservation(Long reservationId);
+    ReservationResponseDto getReservation(Long userId, Long reservationId);
 
     // 캠프사이트 선택 후 예약 요청
-    void createReservation(ReservationCreateRequestDto requestDto);
+    void createReservation(Long userId, ReservationCreateRequestDto requestDto);
 
     // 예약완료 이후 예약취소 요청
-    void cancelReservation(Long reservationId, ReservationCancelRequestDto requestDto);
+    void cancelReservation(Long userId, Long reservationId, ReservationCancelRequestDto requestDto);
 
-    // 예약가능한 캠프사이트 조회를 위해 특정 날짜에 예약이 됐는지 조회
-    ReservedCampSiteIdListResponseDto getReservedCampSiteIds(ReservationCheckDateRequestDto requestDto);
+    // 가장 가까운 예약 정보 조회
+    ReservationResponseDto getUpcomingReservation(Long userId);
 
 }

@@ -4,7 +4,7 @@ import lombok.*;
 
 @Getter
 @ToString
-@Builder(toBuilder = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CampAddrResponseDto {

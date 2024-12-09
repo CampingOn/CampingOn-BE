@@ -10,13 +10,14 @@ import org.springframework.stereotype.Component;
 import site.campingon.campingon.common.jwt.JwtToken;
 import site.campingon.campingon.common.jwt.JwtTokenProvider;
 import site.campingon.campingon.common.jwt.RefreshTokenService;
+import site.campingon.campingon.common.oauth.CustomOAuth2User;
 import site.campingon.campingon.common.util.CookieUtil;
 
 import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class CustomOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
@@ -32,7 +33,7 @@ public class CustomOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         // JWT 토큰 생성
         JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
         String refreshToken = jwtToken.getRefreshToken();
-        String email = jwtTokenProvider.getEmailFromToken(refreshToken);
+        String email = ((CustomOAuth2User) authentication.getPrincipal()).getEmail();
 
         // Refresh Token을 쿠키에 추가
         CookieUtil.setCookie(response, "refreshToken", refreshToken, jwtTokenProvider.getRefreshTokenExpired());
@@ -41,7 +42,7 @@ public class CustomOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         refreshTokenService.saveOrUpdateRefreshToken(email, refreshToken, jwtTokenProvider.getRefreshTokenExpired());
 
 
-        String redirectUrl = frontUrl + "/oauth2/redirect";
+        String redirectUrl = frontUrl + "/oauth/success";
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

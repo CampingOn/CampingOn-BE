@@ -4,7 +4,10 @@ spring:
       client:
         registration:
           google:
-            redirect-uri: # 배포 서버 url 입력
+            redirect-uri: https://api.camping-on.site/login/oauth2/code/google
+
+app:
+  front-url: https://camping-on.site
 
 jwt:
   access-expired: 900 # 15분

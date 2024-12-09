@@ -3,8 +3,11 @@ package site.campingon.campingon.camp.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import site.campingon.campingon.bookmark.entity.Bookmark;
+import site.campingon.campingon.common.public_data.dto.GoCampingParsedResponseDto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,7 +35,7 @@ public class Camp{
   @Column(name = "line_intro", length = 255)
   private String lineIntro; // 요약
 
-  @Column(length = 100)
+  @Column(length = 255)
   private String homepage;
 
   @Column(name = "outdoor_facility", length = 255)
@@ -41,14 +44,20 @@ public class Camp{
   @Column(name = "thumb_image", length = 255)
   private String thumbImage;  // 썸네일 이미지
 
-  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CampKeyword> keywords;
+  @Column(name = "animal_admission", length = 50)
+  private String animalAdmission;
 
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CampImage> images;
+  @Builder.Default
+  private List<CampKeyword> keywords=new ArrayList<>();
+
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<CampImage> images=new ArrayList<>();
 
   @OneToMany(mappedBy = "camp",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-  private List<CampInduty> induty;  // 업종
+  @Builder.Default
+  private List<CampInduty> induty=new ArrayList<>();  // 업종
 
   @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampAddr campAddr;
@@ -57,11 +66,30 @@ public class Camp{
   private CampInfo campInfo;
 
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Bookmark> bookmarks;
+  @Builder.Default
+  private List<Bookmark> bookmarks=new ArrayList<>();
 
   @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
   private LocalDateTime createdAt;
 
   @Column(name = "modified_at", nullable = false, columnDefinition = "DATETIME")
   private LocalDateTime modifiedAt;
+
+  public Camp updateCamp(GoCampingParsedResponseDto data) {
+    this.id = data.getContentId();
+    this.campName = data.getFacltNm();
+    this.lineIntro = data.getLineIntro();
+    this.tel = data.getTel();
+    this.homepage = data.getHomepage();
+    this.outdoorFacility = data.getSbrsCl();
+    this.thumbImage = data.getFirstImageUrl();
+    this.animalAdmission = data.getAnimalCmgCl();
+    this.createdAt = LocalDateTime.parse(
+            data.getCreatedtime()
+            , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    this.modifiedAt = LocalDateTime.parse(
+            data.getModifiedtime()
+            , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    return this;  //자기자신 반환
+  }
 }

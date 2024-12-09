@@ -5,92 +5,99 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
+import site.campingon.campingon.camp.mapper.CampSiteMapper;
 import site.campingon.campingon.reservation.dto.*;
+import site.campingon.campingon.reservation.entity.ReservationStatus;
 import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.reservation.mapper.ReservationMapper;
 import site.campingon.campingon.reservation.entity.Reservation;
 import site.campingon.campingon.reservation.utils.ReservationValidate;
 import site.campingon.campingon.user.entity.User;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationServiceImpl implements ReservationService {
 
+    private final CampSiteMapper campSiteMapper;
     private final ReservationMapper reservationMapper;
     private final ReservationValidate reservationValidate;
     private final ReservationRepository reservationRepository;
 
-    // 유저의 모든 예약리스트를 조회
     @Transactional(readOnly = true)
     public Page<ReservationResponseDto> getReservations(Long userId, Pageable pageable) {
+
+        reservationValidate.validateUserById(userId);
 
         Page<Reservation> reservations = reservationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
 
         return reservations.map(reservationMapper::toResponse);
     }
 
-    // 예약완료 직후 확인을 위해 예약 정보 조회
     @Transactional(readOnly = true)
-    public ReservationResponseDto getReservation(Long reservationId) {
+    public ReservationResponseDto getReservation(Long userId, Long reservationId) {
+
+        reservationValidate.validateUserById(userId);
 
         Reservation reservation = reservationValidate.validateReservationById(reservationId);
 
         return reservationMapper.toResponse(reservation);
     }
 
+    @Transactional(readOnly = true)
+    public ReservationResponseDto getUpcomingReservation(Long userId) {
 
+        reservationValidate.validateUserById(userId);
 
-    // 캠프사이트 선택 후 예약 요청
+        Reservation reservation = reservationRepository.findUpcomingReservationByUserId(userId);
+
+        return reservationMapper.toResponse(reservation);
+    }
+
     @Transactional
-    public void createReservation(ReservationCreateRequestDto requestDto) {
+    public void createReservation(Long userId, ReservationCreateRequestDto requestDto) {
 
-        User user = reservationValidate.validateUserById(requestDto.getUserId());
-        
-        CampSite campSite = reservationValidate.validateCampSiteById(requestDto.getCampId());
+        //REFACTOR: 예약테이블에서 기존 예약과의 유효성 검증을 한번 더 함
+        // 기존 예약 체크인 날짜 < 요청 체크아웃 날짜 && 기존 예약 체크아웃 날짜 > 요청 체크인 날짜 -> true 라면 예외던짐(예약중복)
 
-        Reservation reservation = Reservation.builder()
-            .user(user)
-            .camp(campSite.getCamp())
-            .campSite(campSite)
-            .checkIn(requestDto.getCheckIn())
-            .checkOut(requestDto.getCheckOut())
-            .guestCnt(requestDto.getGuestCnt())
-            .totalPrice(requestDto.getTotalPrice())
-            .build();
+        User user = reservationValidate.validateUserById(userId);
+
+        CampSite campSite = reservationValidate.validateCampSiteById(requestDto.getCampSiteId());
+
+        Camp camp = reservationValidate.validateCampById(requestDto.getCampId());
+
+        Reservation reservation = reservationMapper.toEntity(requestDto)
+                .toBuilder()
+                .user(user)
+                .camp(camp)
+                .campSite(campSite)
+                .build();
 
         reservationRepository.save(reservation);
     }
 
-    // 예약완료 이후 예약취소 요청
     @Transactional
-    public void cancelReservation(Long reservationId, ReservationCancelRequestDto requestDto) {
+    public void cancelReservation(Long userId, Long reservationId, ReservationCancelRequestDto requestDto) {
+
+        reservationValidate.validateUserById(userId);
+
+        reservationValidate.validateCampSiteById(requestDto.getCampSiteId());
+
+        reservationValidate.validateCampById(requestDto.getCampId());
+
         Reservation reservation = reservationValidate.validateReservationById(requestDto.getId());
 
         reservationValidate.validateStatus(requestDto.getStatus());
 
-        Reservation canceledReservation = reservation.toBuilder()
-            .status(requestDto.getStatus())
-            .cancelReason(requestDto.getCancelReason())
-            .build();
+        reservation.cancel(requestDto.getCancelReason());
 
-        reservationRepository.save(canceledReservation);
+        reservationRepository.save(reservation);
     }
 
-
-
-    // 예약가능한 캠프사이트 조회를 위해 특정 날짜에 예약이 됐는지 조회
-    @Transactional(readOnly = true)
-    public ReservedCampSiteIdListResponseDto getReservedCampSiteIds(ReservationCheckDateRequestDto requestDto) {
-
-        List<Long> reservedIds = reservationRepository.findReservedCampSiteIds(
-            requestDto.getCampId(),
-            requestDto.getCheckIn(),
-            requestDto.getCheckOut()
-        );
-
-        return new ReservedCampSiteIdListResponseDto(reservedIds);
-    }
 }

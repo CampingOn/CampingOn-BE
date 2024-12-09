@@ -23,9 +23,11 @@ public class CampInfo {
     @JoinColumn(name = "camp_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private Camp camp;
 
+    @Builder.Default
     @Column(name = "recommend_cnt")
-    private Integer recommendCnt;
+    private Integer recommendCnt = 0;
 
+    @Builder.Default
     @Column(name = "bookmark_cnt")
-    private Integer bookmarkCnt;
+    private Integer bookmarkCnt = 0;
 }

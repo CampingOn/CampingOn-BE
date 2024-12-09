@@ -2,20 +2,21 @@ package site.campingon.campingon.camp.dto;
 
 import lombok.*;
 
-@Getter
 @ToString
-@Builder(toBuilder = true)
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CampAddrResponseDto {
+@Builder
+public class CampSimpleDto {
+
+    private Long campId;
+
+    private String campName;
 
     private String city;
 
     private String state;
 
-    private String zipcode;
-
     private String streetAddr;
 
-    private String detailedAddr;
 }

@@ -1,9 +1,9 @@
 package site.campingon.campingon.reservation.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @ToString
@@ -11,17 +11,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ReservationCreateRequestDto {
 
-    private Long userId;
-
     private Long campId;
 
     private Long campSiteId;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime checkIn;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate checkin;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime checkOut;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate checkout;
 
     private int guestCnt;
 

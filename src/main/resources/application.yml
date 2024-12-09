@@ -1,4 +1,7 @@
 spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_NAME}?retryWrites=true&w=majority&appName=CampingOn
   datasource:
     url: ${MYSQL_URL}  # MySQL 데이터베이스 URL
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -24,6 +27,10 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile, email
+  servlet:
+    multipart:
+      max-file-size: 10MB      # 단일 파일의 최대 크기
+      max-request-size: 100MB   # 전체 요청의 최대 크기
   profiles:
     active: dev, s3Bucket  # logback-spring SpringProfile 설정 및 AWS S3 Bucket 설정
 
@@ -36,4 +43,4 @@ jwt:
 app:
   pagination:
     reservation:
-      size: 10
+      size: 5

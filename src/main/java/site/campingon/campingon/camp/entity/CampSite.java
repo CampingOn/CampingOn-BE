@@ -36,7 +36,7 @@ public class CampSite {
 
     @Builder.Default
     @Column(name = "is_available", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
-    private boolean isAvailable = false;
+    private boolean isAvailable = true;
 
 
     public void updateCampSite(Camp camp, int maximumPeople, int price, Induty induty, String innerFacility) {

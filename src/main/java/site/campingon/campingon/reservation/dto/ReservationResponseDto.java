@@ -1,25 +1,27 @@
 package site.campingon.campingon.reservation.dto;
 
 import lombok.*;
+import site.campingon.campingon.reservation.entity.CheckTime;
 import site.campingon.campingon.reservation.entity.ReservationStatus;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 
 @Getter
 @ToString
-@Builder(toBuilder = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationResponseDto {
 
     private Long id;
 
-    private Long userId;
+    private LocalDate checkinDate;
 
-    private Long campSiteId;
+    private LocalDate checkoutDate;
 
-    private LocalDateTime checkIn;
+    private CheckTime checkinTime;
 
-    private LocalDateTime checkOut;
+    private CheckTime checkoutTime;
 
     private int guestCnt;
 
@@ -30,5 +32,9 @@ public class ReservationResponseDto {
     private CampResponseDto campResponseDto;
 
     private CampAddrResponseDto campAddrResponseDto;
+
+    private CampSiteResponseDto campSiteResponseDto;
+
+    private ReviewResponseDto reviewResponseDto;
 
 }

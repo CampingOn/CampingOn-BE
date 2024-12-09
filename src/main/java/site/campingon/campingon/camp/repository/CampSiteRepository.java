@@ -8,6 +8,7 @@ import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.entity.Induty;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,5 +38,19 @@ public interface CampSiteRepository extends JpaRepository<CampSite, Long> {
             SELECT cs FROM CampSite cs
             WHERE cs.camp.id = :campId""")
   List<CampSite> findAllByCampId(@Param("campId") Long campId);
+
   List<CampSite> findAllByCampAndSiteType(Camp camp, Induty induty);
+
+  // 특정 캠핑장의 특정 날짜에 예약 가능한 캠프사이트를 조회
+  @Query("SELECT cs FROM CampSite cs " +
+          "LEFT JOIN Reservation r ON cs.id = r.campSite.id " +
+          "WHERE cs.isAvailable = true " +
+          "AND cs.camp.id = :campId " +
+          "AND (r.id IS NULL OR " +
+          "     (r.status = 'CANCELED' AND r.checkinDate < :checkout AND r.checkoutDate > :checkin)) " +
+          "ORDER BY cs.id ASC")
+  List<CampSite> findAvailableCampSites(@Param("campId") Long campId,
+                                        @Param("checkin") LocalDate checkin,
+                                        @Param("checkout") LocalDate checkout);
+
 }

@@ -2,23 +2,26 @@ package site.campingon.campingon.camp.dto;
 
 import lombok.*;
 import site.campingon.campingon.camp.entity.Induty;
+import site.campingon.campingon.reservation.entity.CheckTime;
 
 import java.time.LocalTime;
-import java.util.List;
 
+@ToString
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
 public class CampSiteResponseDto {
-    private Long siteId;              // 캠핑지 ID
-    private Integer maximumPeople;        // 최대 수용 인원
-    private Integer price;            // 가격
-    private String indoorFacility;    // 실내 시설 설명
-    private Induty siteType;              // 업종 구분
-    private boolean isAvailable;
+    private Long siteId;
+    private Integer maximumPeople;
+    private Integer price;
+    private Induty siteType;
+    private String indoorFacility;
 
-    private LocalTime checkInTime;    // 체크인 시간
-    private LocalTime checkOutTime;   // 체크아웃 시간
+    @Builder.Default
+    private CheckTime checkinTime = CheckTime.CHECKIN;
+    @Builder.Default
+    private CheckTime checkoutTime = CheckTime.CHECKOUT;
+
+    CampSimpleDto campSimpleDto;
 }

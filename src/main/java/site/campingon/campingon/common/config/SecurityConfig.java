@@ -14,12 +14,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
+import site.campingon.campingon.common.jwt.CustomAccessDeniedHandler;
+import site.campingon.campingon.common.jwt.CustomAuthenticationEntryPoint;
 import site.campingon.campingon.common.oauth.handler.CustomOAuth2FailureHandler;
 import site.campingon.campingon.common.oauth.service.CustomOAuth2UserService;
 import site.campingon.campingon.common.jwt.CustomUserDetailsService;
 import site.campingon.campingon.common.jwt.JwtAuthenticationFilter;
 import site.campingon.campingon.common.jwt.JwtTokenProvider;
-import site.campingon.campingon.common.oauth.handler.CustomOAuthSuccessHandler;
+import site.campingon.campingon.common.oauth.handler.CustomOAuth2SuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -28,11 +30,13 @@ import site.campingon.campingon.common.oauth.handler.CustomOAuthSuccessHandler;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final CustomOAuthSuccessHandler customOAuthSuccessHandler;
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
     private final CustomOAuth2FailureHandler customOAuthFailureHandler;
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
     private final CustomUserDetailsService customUserDetailsService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -51,7 +55,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService))
 //                        .defaultSuccessUrl("/oauth/success") // 로그인 성공시 이동할 URL
-                        .successHandler(customOAuthSuccessHandler)
+                        .successHandler(customOAuth2SuccessHandler)
 //                        .failureUrl("/oauth/fail") // 로그인 실패시 이동할 URL
                         .failureHandler(customOAuthFailureHandler))
                 .logout(logout -> logout.logoutSuccessUrl("/oauth/logout") // 로그아웃 성공시 해당 url로 이동
@@ -60,8 +64,17 @@ public class SecurityConfig {
         // 경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/","/h2-console/**").permitAll()
-                        .anyRequest().permitAll());
+                        .requestMatchers(SecurityPath.ADMIN_ENDPOINTS).hasRole("ADMIN")
+                        .requestMatchers(SecurityPath.USER_ENDPOINTS).hasRole("USER")
+                        .requestMatchers(SecurityPath.PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().permitAll()
+                );
+
+        // 예외 처리
+        http
+            .exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(customAuthenticationEntryPoint) // 인증 실패 처리
+                .accessDeniedHandler(customAccessDeniedHandler)); // 인가 실패 처리
 
         // JwtFilter 추가
         http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, objectMapper), UsernamePasswordAuthenticationFilter.class);
@@ -74,6 +87,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:3000"); // 허용할 클라이언트 도메인
+        configuration.addAllowedOrigin("https://camping-on.site");
+        configuration.addAllowedOrigin("https://www.camping-on.site");
         configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
         configuration.setAllowCredentials(true); // 인증 정보 허용 (쿠키 등)

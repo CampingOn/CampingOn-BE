@@ -14,6 +14,10 @@ public class ReservationCancelRequestDto {
 
     private Long id;
 
+    private Long campId;
+
+    private Long campSiteId;
+
     private ReservationStatus status;
 
     private String cancelReason;

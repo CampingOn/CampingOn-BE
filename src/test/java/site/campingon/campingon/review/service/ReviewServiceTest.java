@@ -1,6 +1,5 @@
 package site.campingon.campingon.review.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +11,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.repository.CampRepository;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.reservation.entity.Reservation;
 import site.campingon.campingon.reservation.entity.ReservationStatus;
 import site.campingon.campingon.reservation.repository.ReservationRepository;
@@ -24,7 +25,7 @@ import site.campingon.campingon.review.mapper.ReviewImageMapper;
 import site.campingon.campingon.review.mapper.ReviewMapper;
 import site.campingon.campingon.review.repository.ReviewImageRepository;
 import site.campingon.campingon.review.repository.ReviewRepository;
-import site.campingon.campingon.s3bucket.service.S3BucketService;
+import site.campingon.campingon.common.s3bucket.service.S3BucketService;
 import site.campingon.campingon.user.entity.User;
 
 import java.io.IOException;
@@ -353,8 +354,11 @@ class ReviewServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> reviewService.toggleRecommend(reviewId, userId))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Review not found with ID: " + reviewId);
+                .isInstanceOf(GlobalException.class)
+                .satisfies(exception -> {
+                    GlobalException globalException = (GlobalException) exception;
+                    assertThat(globalException.getErrorCode()).isEqualTo(ErrorCode.REVIEW_NOT_FOUND_BY_ID);
+                });
 
         verify(reviewRepository).findById(reviewId);
         verifyNoMoreInteractions(reviewMapper, reviewRepository);
@@ -380,11 +384,13 @@ class ReviewServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> reviewService.toggleRecommend(reviewId, userId))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("User is not authorized to toggle recommend for this review.");
+                .isInstanceOf(GlobalException.class)
+                .satisfies(exception -> {
+                    GlobalException globalException = (GlobalException) exception;
+                    assertThat(globalException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND_BY_ID);
+                });
 
         verify(reviewRepository).findById(reviewId);
         verifyNoMoreInteractions(reviewMapper, reviewRepository);
     }
-
 }

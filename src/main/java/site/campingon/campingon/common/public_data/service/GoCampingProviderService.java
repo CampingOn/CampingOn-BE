@@ -12,6 +12,7 @@ import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.entity.Induty;
 import site.campingon.campingon.camp.repository.*;
 import site.campingon.campingon.common.public_data.GoCampingPath;
+import site.campingon.campingon.common.public_data.dto.GoCampingParsedResponseDto;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,7 +26,7 @@ import static site.campingon.campingon.common.public_data.PublicDataConstants.MO
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class GoCampingCampSiteService {
+public class GoCampingProviderService {
     private final CampSiteRepository campSiteRepository;
     private final CampIndutyRepository campIndutyRepository;
 
@@ -33,18 +34,17 @@ public class GoCampingCampSiteService {
     private String serviceKey;
 
     //CampInduty 데이터 삽입
-    //todo 업데이트 처리하기
     @Transactional
-    public void createOrUpdateCampInduty(Camp camp, Integer normalSiteCnt,
-                                         Integer carSiteCnt, Integer glampSiteCnt,
-                                         Integer caravSiteCnt, Integer personalCaravanSiteCnt) {
+    public void createOrUpdateCampInduty(Camp camp, GoCampingParsedResponseDto data) {
+        //기존에 데이터가 있다면 삭제
+        campIndutyRepository.deleteAllByCampId(data.getContentId());
 
         Map<Induty, Integer> siteCounts = Map.of(
-                NORMAL_SITE, normalSiteCnt,
-                CAR_SITE, carSiteCnt,
-                GLAMP_SITE, glampSiteCnt,
-                CARAV_SITE, caravSiteCnt,
-                PERSONAL_CARAV_SITE, personalCaravanSiteCnt
+                NORMAL_SITE, data.getGnrlSiteCo(),
+                CAR_SITE, data.getAutoSiteCo(),
+                GLAMP_SITE, data.getGlampSiteCo(),
+                CARAV_SITE, data.getCaravSiteCo(),
+                PERSONAL_CARAV_SITE, data.getIndvdlCaravSiteCo()
         );
 
         siteCounts.forEach((induty, count) -> {

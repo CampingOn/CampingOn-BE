@@ -1,5 +1,6 @@
 package site.campingon.campingon.camp.entity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,7 +13,8 @@ public enum Induty {
     CARAV_SITE("카라반", 80000, 4),
     PERSONAL_CARAV_SITE("카라반(개인)", 35000, 6);
 
+    @JsonValue
     private final String type;
     private final Integer price;
-    private final Integer maximum_people;
+    private final Integer maximumPeople;
 }

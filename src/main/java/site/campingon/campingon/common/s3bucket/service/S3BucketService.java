@@ -1,17 +1,23 @@
-package site.campingon.campingon.s3bucket.service;
+package site.campingon.campingon.common.s3bucket.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.CopyObjectResult;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import site.campingon.campingon.common.exception.GlobalException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static site.campingon.campingon.common.exception.ErrorCode.*;
 
 
 @Service
@@ -23,7 +29,7 @@ public class S3BucketService {
   private String bucketName;
 
   // 단일 파일 업로드
-  public String upload(MultipartFile file, String path) throws IOException {
+  public String upload(MultipartFile file, String path) {
     String fileName = generateValidPath(path) + createUniqueFileName(file);
     String fileUrl = "https://" + bucketName + ".s3.amazonaws.com/" + fileName;
 
@@ -31,25 +37,16 @@ public class S3BucketService {
       s3Client.putObject(bucketName, fileName, file.getInputStream(), createFileMetadata(file));
       return fileUrl;
     } catch (IOException e) {
-      throw new IOException("파일 업로드 실패: " + e.getMessage());
+      throw new GlobalException(FILE_UPLOAD_FAILED);
     }
   }
 
   // 다중 파일 업로드
-  public List<String> upload(List<MultipartFile> files, String path) throws IOException {
+  public List<String> upload(List<MultipartFile> files, String path) {
     List<String> uploadedUrls = new ArrayList<>();
-    List<String> failedFiles = new ArrayList<>();
 
     for (MultipartFile file : files) {
-      try {
-        uploadedUrls.add(upload(file, path));
-      } catch (IOException e) {
-        failedFiles.add(file.getOriginalFilename());
-      }
-    }
-
-    if (!failedFiles.isEmpty()) {
-      throw new IOException("다음 파일들의 업로드가 실패했습니다: " + String.join(", ", failedFiles));
+      uploadedUrls.add(upload(file, path));
     }
 
     return uploadedUrls;
@@ -58,7 +55,7 @@ public class S3BucketService {
   // 단일 파일 삭제
   public void remove(String filename) {
     if (filename == null || filename.trim().isEmpty()) {
-      throw new IllegalArgumentException("파일명이 비어있습니다.");
+      throw new IllegalArgumentException("파일명이 없습니다.");
     }
 
     try {
@@ -120,5 +117,34 @@ public class S3BucketService {
     metadata.setContentType(file.getContentType());
     metadata.setContentLength(file.getSize());
     return metadata;
+  }
+
+  public void moveObject(String sourceKey, String destinationKey) {
+    // 원본 파일 존재 여부 확인
+    if (!s3Client.doesObjectExist(bucketName, sourceKey)) {
+      throw new GlobalException(FILE_NOT_FOUND);
+    }
+
+    try {
+      CopyObjectRequest copyRequest = new CopyObjectRequest(
+          bucketName,
+          sourceKey,
+          bucketName,
+          destinationKey
+      );
+
+      CopyObjectResult copyResult = s3Client.copyObject(copyRequest);
+
+      if (copyResult != null && copyResult.getETag() != null) {
+        s3Client.deleteObject(bucketName, sourceKey);
+      } else {
+        throw new GlobalException(FILE_MOVE_FAILED);
+      }
+
+    } catch (AmazonS3Exception e) {
+      throw new GlobalException(S3_OPERATION_FAILED);
+    } catch (Exception e) {
+      throw new GlobalException(FILE_MOVE_FAILED);
+    }
   }
 }

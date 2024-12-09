@@ -7,6 +7,8 @@ import site.campingon.campingon.bookmark.entity.Bookmark;
 import site.campingon.campingon.bookmark.repository.BookmarkRepository;
 import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.repository.CampRepository;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.entity.User;
 import site.campingon.campingon.user.repository.UserRepository;
 
@@ -25,22 +27,19 @@ public class BookmarkService {
     // 이미 찜 관계가 있는지 확인
     Optional<Bookmark> existingBookmark = bookmarkRepository.findByCampIdAndUserId(campId, userId);
 
-    // 이미 찜 관계가 있는 상태
+    // 이미 찜 등록이 된경우
     if (existingBookmark.isPresent()) {
       // isMarked 상태를 반대로 토글 - true->false, false->true로 전환
-      Bookmark bookmark = existingBookmark.get().toBuilder()
-          .isMarked(!existingBookmark.get().isMarked())
-          .build();
-      bookmarkRepository.save(bookmark);
+      bookmarkRepository.delete(existingBookmark.get());
       return;  // 변경 후 반환
     }
 
     // 새로운 찜 관계 생성
     Camp camp = campRepository.findById(campId)
-        .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
+        .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
 
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        .orElseThrow(() -> new GlobalException(ErrorCode.BOOKMARK_USER_NOT_FOUND));
 
     Bookmark bookmark = Bookmark.builder()
         .camp(camp)

@@ -1,4 +1,4 @@
-package site.campingon.campingon.s3bucket.config;
+package site.campingon.campingon.common.s3bucket.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

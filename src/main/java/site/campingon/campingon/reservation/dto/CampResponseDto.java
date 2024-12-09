@@ -4,14 +4,14 @@ import lombok.*;
 
 @Getter
 @ToString
-@Builder(toBuilder = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CampResponseDto {
 
     private Long id;
 
-    private String name;
+    private String campName;
 
     private String thumbImage;
 }

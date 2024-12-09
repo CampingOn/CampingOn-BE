@@ -25,4 +25,8 @@ public class ReviewImage {
 
     @Column(name = "image_url", length = 255)
     private String imageUrl; // 이미지 URL
+
+    public void updateImageUrl(String newUrl) {
+        this.imageUrl = newUrl;
+    }
 }

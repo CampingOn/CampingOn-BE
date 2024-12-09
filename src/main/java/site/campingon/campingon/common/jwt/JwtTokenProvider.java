@@ -11,6 +11,7 @@ import java.security.Key;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +37,16 @@ public class JwtTokenProvider {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
+
     @Value("${jwt.access-expired}")
     private Long accessTokenExpired;
 
     @Value("${jwt.refresh-expired}")
     private Long refreshTokenExpired;
+
 
     public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey) {
         byte[] keyBytes = secretKey.getBytes();
@@ -52,7 +58,6 @@ public class JwtTokenProvider {
 
         long now = (new Date()).getTime();
         Date accessTokenExpiration = new Date(now + accessTokenExpired * 1000);
-        Date refreshTokenExpiration = new Date(now + refreshTokenExpired * 1000);
 
         CustomUserPrincipal userPrincipal = (CustomUserPrincipal) authentication.getPrincipal();
 
@@ -61,17 +66,17 @@ public class JwtTokenProvider {
             .setSubject(userPrincipal.getEmail()) // 이메일을 Subject로 설정
             .claim("nickname", userPrincipal.getNickname()) // 닉네임
             .claim("role", userPrincipal.getRole()) // 사용자 역할(Role)
+            .claim("name",userPrincipal.getName())
             .setExpiration(accessTokenExpiration) // 만료 시간
             .signWith(secretKey, SignatureAlgorithm.HS256) // 서명
             .compact();
 
-        // Refresh Token 생성 (주로 만료 시간만 포함)
-        String refreshToken = Jwts.builder()
-            .setSubject(userPrincipal.getEmail()) // 사용자 식별용 정보
-            .setExpiration(refreshTokenExpiration) // 만료 시간
-            .signWith(secretKey, SignatureAlgorithm.HS256) // 서명
-            .compact();
+        // Refresh Token 생성 (임의의 값 생성)
+        String refreshToken = UUID.randomUUID().toString();
 
+        // DB에 저장
+        refreshTokenService.saveOrUpdateRefreshToken(userPrincipal.getEmail(), refreshToken,
+            refreshTokenExpired);
 
         // JWT Token 객체 반환
         return JwtToken.builder()
@@ -82,17 +87,7 @@ public class JwtTokenProvider {
 
     }
 
-    // 리프레시 토큰 생성
-    public String createRefreshToken(String email) {
-        long now = (new Date()).getTime();
-        Date refreshTokenExpiration = new Date(now + refreshTokenExpired * 1000);
 
-        return Jwts.builder()
-            .setSubject(email) // 토큰의 Subject에 사용자 이메일 저장
-            .setExpiration(refreshTokenExpiration) // 만료 시간 설정
-            .signWith(secretKey, SignatureAlgorithm.HS256) // 서명 알고리즘과 키 설정
-            .compact();
-    }
 /*
 
     // OAuth2 사용자 토큰 생성 메서드
@@ -150,6 +145,7 @@ public class JwtTokenProvider {
         String email = claims.getSubject(); // 토큰 subject에서 email 추출
         String nickname = claims.get("nickname").toString(); // nickname 추출
         String password = claims.get("password", String.class);
+        String name = claims.get("name", String.class);
 
         String roleName = claims.get("role", String.class); // 문자열로 읽기
 
@@ -164,7 +160,7 @@ public class JwtTokenProvider {
         Long id = user.getId();
 
         // CustomUserDetails 생성
-        CustomUserDetails userDetails = new CustomUserDetails(id, email, nickname, role, password);
+        CustomUserDetails userDetails = new CustomUserDetails(id, email, nickname, role, password, name);
 
         // 문자열을 GrantedAuthority로 변환
         Collection<? extends GrantedAuthority> authorities =
@@ -176,21 +172,21 @@ public class JwtTokenProvider {
     }
 
     // 토큰 정보 검증
+// 토큰 정보 검증
     public boolean validateToken(String token) {
-        log.info("validateToken start");
+        log.debug("validateToken start");
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT Token", e);
+            log.error("Invalid JWT Token", e);
         } catch (ExpiredJwtException e) {
-            // refresh token 활용해서 재발급
-            log.info("Expired JWT Token", e);
-            throw e;
+            log.error("Expired JWT Token", e);
         } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
+            log.error("Unsupported JWT Token", e);
         } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
+            log.error("JWT claims string is empty.", e);
+
         }
         return false;
     }
