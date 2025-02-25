@@ -21,11 +21,8 @@ public interface CampSiteRepository extends JpaRepository<CampSite, Long> {
             """)
   List<CampSite> findByCampId(@Param("campId") Long campId);
 
-  @Query(value = """
+  @Query("""
             SELECT cs FROM CampSite cs
-            JOIN FETCH cs.camp c
-            JOIN FETCH c.campInfo
-            JOIN FETCH c.campAddr
             WHERE cs.id = :siteId
             AND cs.camp.id = :campId
             """)
