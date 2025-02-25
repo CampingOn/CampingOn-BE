@@ -2,8 +2,6 @@ package site.campingon.campingon.camp.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.LazyToOne;
-import org.hibernate.annotations.LazyToOneOption;
 import site.campingon.campingon.bookmark.entity.Bookmark;
 import site.campingon.campingon.common.public_data.dto.GoCampingParsedResponseDto;
 
@@ -67,10 +65,10 @@ public class Camp{
   @Builder.Default
   private List<CampInduty> induty=new ArrayList<>();  // 업종
 
-  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampAddr campAddr;
 
-  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampInfo campInfo;
 
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
